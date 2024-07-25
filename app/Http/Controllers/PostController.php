@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Post\PostStoreRequest;
+use App\Http\Requests\Post\PostUpdateRequest;
 use App\Models\Post;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -30,18 +32,12 @@ class PostController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(PostStoreRequest $request)
     {
-        $request->validate([
-            "title" => "required|min:5",
-            "description" => "required|min:20",
-            "user_id" => "required",
-            'image' => 'required|mimes:jpg,jpeg,png|max:1024',
-        ]);
+        $requestDB = $request->validated();
         if (!is_dir(public_path("assets/images/posts"))) {
             mkdir(public_path("assets/images/posts"));
         }
-        $requestDB = $request->all();
         $image = $request->file('image');
         $imageNameDB = time() . $image->getClientOriginalName();
         $requestDB['image'] = $imageNameDB;
@@ -81,16 +77,10 @@ class PostController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(PostUpdateRequest $request, string $id)
     {
-        $request->validate([
-            "title" => "required|min:5",
-            "description" => "required|min:20",
-            "user_id" => "required",
-            'image' => 'mimes:jpg,jpeg,png|max:1024',
-        ]);
+        $requestDB = $request->validated();
         $post = Post::find($id);
-        $requestDB = $request->all();
         if ($request->hasFile("image")) {
             $image_path = public_path("assets/images/posts/" . $post->image);
             if (file_exists($image_path)) {

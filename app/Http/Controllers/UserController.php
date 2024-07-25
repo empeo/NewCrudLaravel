@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\User\UserStoreRequest;
+use App\Http\Requests\User\UserUpdateRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -28,17 +30,8 @@ class UserController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(UserStoreRequest $request)
     {
-        $request->validate([
-            'name' => 'required|min:5',
-            'email' => 'required|email|unique:users',
-            'password' => 'required|min:8',
-            'conpassword' => 'required|min:8|same:password',
-            'phone' => 'required|min:10|regex:/^[0-9]{11}$/',
-            'image' => 'required|mimes:jpg,jpeg,png|max:1024',
-            'gender' => 'required|in:male,female'
-        ]);
         $requestData = $request->except('conpassword');
         $request['password'] = Hash::make($request->password);
         if (!is_dir(public_path("assets/images/users"))) {
@@ -84,21 +77,10 @@ class UserController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(UserUpdateRequest $request, string $id)
     {
         $user = User::find($id);
-        $request->validate([
-            'name' => 'required|min:5',
-            'email' => 'required|email|unique:users,email,' . $id,
-            'password' => 'required|min:8',
-            'conpassword' => 'required|min:8|same:password',
-            'phone' => 'required|min:10|regex:/^[0-9]{11}$/',
-            'image' => 'mimes:jpg,jpeg,png|max:1024',
-            'gender' => 'required|in:male,female'
-        ]);
-
-        $requestData = $request->except(["conpassword"]);
-
+        $requestData = $request->except(['conpassword']);
         if ($request->hasFile('image')) {
             $imagePath = public_path("assets/images/users/{$user->image}");
             if (file_exists($imagePath)) {
